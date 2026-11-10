@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>평행선 찾기 활동</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--fg:#1d2733;--mut:#5d6b7a;--line:#cfd8e3;--acc:#2f6fed;--accbg:#e6eeff;--ok:#1f9d55;--bad:#d64545;--ink:#1d2733;--sky:#d6ebff;--grass:#c4e8b4;--box:#e9eef5;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10161d;--card:#18212b;--fg:#e8eef5;--mut:#9aa8b6;--line:#2d3a48;--acc:#6b9bff;--accbg:#1f2f4d;--ok:#3ccf7d;--bad:#ff7070;--ink:#e8eef5;--sky:#1d3350;--grass:#25402b;--box:#243241}}
+:root[data-theme="dark"]{--bg:#10161d;--card:#18212b;--fg:#e8eef5;--mut:#9aa8b6;--line:#2d3a48;--acc:#6b9bff;--accbg:#1f2f4d;--ok:#3ccf7d;--bad:#ff7070;--ink:#e8eef5;--sky:#1d3350;--grass:#25402b;--box:#243241}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif}
+#app{max-width:760px;margin:0 auto;padding:12px}
+h2{margin:6px 0}
+.top{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+button{font:inherit;cursor:pointer}
+.ghost{background:var(--card);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:8px 12px}
+.fig,.scene{width:100%;display:block;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:10px 0}
+.q{margin:6px 0 10px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+.row{display:flex;gap:8px;margin:8px 0}.col{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.ch{flex:1;background:var(--card);color:var(--fg);border:2px solid var(--line);border-radius:12px;padding:12px;text-align:left}
+.ch.on{border-color:var(--acc);background:var(--accbg)}
+.go{width:100%;background:var(--acc);color:#fff;border:0;border-radius:12px;padding:13px;font-weight:700}
+.go:disabled{opacity:.4}
+.ln{stroke:#ff6a00;stroke-width:5;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.ref{stroke:#2f6fed}
+.hl{stroke:#fff;stroke-width:9;stroke-linecap:round;opacity:.9;vector-effect:non-scaling-stroke}
+.ex{stroke:var(--bad);stroke-width:1.6;stroke-dasharray:6 5;vector-effect:non-scaling-stroke}
+.lab{font-size:18px;font-weight:800;fill:#111;stroke:#fff;stroke-width:4px;paint-order:stroke;text-anchor:middle;dominant-baseline:central}
+.ang{font-size:13px;font-weight:800;fill:#0b7a3b;stroke:#fff;stroke-width:3px;paint-order:stroke;text-anchor:middle;dominant-baseline:central}
+.ang.x{fill:#c62828}
+.ra{fill:none;stroke:#0b7a3b;stroke-width:2.5}
+.pin{cursor:pointer}.pn{font-size:14px;font-weight:800;fill:#fff}
+.pl{font-size:11px;font-weight:700;fill:var(--ink);paint-order:stroke;stroke:var(--card);stroke-width:3px;text-anchor:middle}
+.msg{font-size:18px;font-weight:800;margin:0 0 4px}
+.chest{font-size:64px;text-align:center}
+.item{display:flex;justify-content:space-between;width:100%;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:12px;margin:6px 0}
+.mut{color:var(--mut)}
+textarea{width:100%;padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--fg);font:inherit;resize:vertical;margin:6px 0}
+.tag{min-width:72px;align-self:center;font-weight:700}.hint{color:var(--bad);font-weight:700;margin:4px 0}
+.ip{flex:1;min-width:150px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit}
+.cert{border:6px double #b8860b;border-radius:16px;padding:22px;text-align:center;background:#fffdf3;color:#222}.cert h1{margin:4px 0;font-size:28px;color:#8a5a00}.seal{font-size:52px}
+.who{font-size:22px;font-weight:800;border-bottom:2px solid #b8860b;display:inline-block;min-width:200px;margin:6px 0}
+.cert table{margin:10px auto;border-collapse:collapse;font-size:14px}.cert td{padding:2px 12px;border-bottom:1px dotted #bbb}.dt{font-weight:700}
+#sheet{display:none}#cert{display:none}
+@media print{
+ body{background:#fff;color:#000}#app{display:none!important}#sheet{display:block;color:#000}body.pcert #sheet{display:none!important}body.pcert #cert{display:block!important}body.pcert #cert .cert{margin:10mm auto;max-width:180mm}
+ @page{size:A4;margin:10mm}
+ .page{page-break-after:always}.page h3{margin:0 0 6mm;font-size:15pt}
+ .grid{display:grid;grid-template-columns:90mm 90mm;gap:6mm 10mm}
+ .cell h4{margin:0 0 2mm;font-size:11pt}.cell p{margin:1.5mm 0;font-size:10pt}
+ #sheet svg{border:.3mm solid #999}
+ #sheet .hl{display:none}#sheet .ln{stroke:#111;stroke-width:2}#sheet .ref{stroke:#111;stroke-dasharray:5 3}#sheet .lab{fill:#111}
+}
+</style></head><body>
+<div id="app"></div>
+<div id="sheet"></div>
+<script>
+const $=s=>document.querySelector(s),rad=d=>d*Math.PI/180,C={x:200,y:140},R0=120,H=100;
+const Z=[
+{n:'교문 철문',th:0,s:90,d:[0,0],x:45,y:215},
+{n:'계단 난간',th:-35,s:90,d:[0,0],x:150,y:185},
+{n:'축구 골대',th:0,s:90,d:[0,5],x:338,y:232},
+{n:'지붕 창틀',th:55,s:75,d:[0,0],x:200,y:95},
+{n:'철봉',th:-25,s:90,d:[-5,0],x:255,y:200},
+{n:'타일 복도',th:-20,s:70,d:[0,0],x:150,y:255},
+{n:'체육관 바닥',th:10,s:45,d:[0,-5],x:335,y:110},
+{n:'놀이기구',th:65,s:80,d:[5,-5],x:50,y:105}];
+const RS=['나와 다가 모두 가에 수직(90°)이다','나와 다 중에 가에 수직이 아닌 선이 있다','두 직선이 거의 같은 방향으로 보인다'];
+let S={view:'map',res:{},cur:null,pick:null,why:null,zoom:false};
+const isPar=z=>z.d[0]===z.d[1];
+function geom(z){const t=rad(z.th),u={x:Math.cos(t),y:Math.sin(t)};
+ return{u,lines:[-1,1].map((k,i)=>{const a=rad(z.th+90+z.d[i]);return{p:{x:C.x+k*z.s*u.x,y:C.y+k*z.s*u.y},dir:{x:Math.cos(a),y:Math.sin(a)}}})}}
+function meetOf(z){const[a,b]=geom(z).lines,det=-a.dir.x*b.dir.y+b.dir.x*a.dir.y;if(Math.abs(det)<1e-6)return null;
+ const t=(-(b.p.x-a.p.x)*b.dir.y+b.dir.x*(b.p.y-a.p.y))/det,m={x:a.p.x+t*a.dir.x,y:a.p.y+t*a.dir.y};
+ return Math.hypot(m.x-C.x,m.y-C.y)>2500?null:m}
+function scene(i,L,seg,u){
+ const[A,B]=L,r={p:C,dir:u},E=120,
+ b=(l,w,c)=>`<line ${seg(l.p,l.dir,E)} stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`,
+ R=(y,h,c)=>`<rect x="-4000" y="${y}" width="8000" height="${h}" fill="${c}"/>`,
+ sky=(a,g)=>R(-4000,4140,a)+R(140,4000,g),
+ pt=(l,k)=>`${(l.p.x+k*l.dir.x*E).toFixed(1)},${(l.p.y+k*l.dir.y*E).toFixed(1)}`,
+ two=(w,c)=>b(A,w,c)+b(B,w,c);
+ let s='';
+ switch(i){
+ case 0:s=sky('#bcd6ea','#7e8c6a')+b(r,10,'#9aa1a8')+two(16,'#2f353b')+two(4,'#7d8791');break;
+ case 1:s=R(-4000,8000,'#e8dcc8')+b(r,10,'#b9ad98')+two(12,'#4d5966')+two(4,'#9fb0c0');break;
+ case 2:s=sky('#a9d4f0','#5fa35a')+b(r,17,'#333')+two(17,'#333')+b(r,12,'#fff')+two(12,'#fff');break;
+ case 3:s=R(-4000,8000,'#d9c9b2')+`<polygon points="${pt(A,-1)} ${pt(A,1)} ${pt(B,1)} ${pt(B,-1)}" fill="#bfe3f5"/>`+b(r,10,'#7a5230')+two(14,'#7a5230');break;
+ case 4:s=sky('#c6e3f7','#8bbf7a')+b(r,13,'#555')+two(13,'#555')+b(r,8,'#b8c0c8')+two(8,'#b8c0c8');break;
+ case 5:s=R(-4000,8000,'#efe6d2');[A,B].forEach((l,j)=>{const a=rad((j?1:-1)*50),c=Math.cos(a),n=Math.sin(a),hx=l.dir.x*c-l.dir.y*n,hy=l.dir.x*n+l.dir.y*c;for(let t=-100;t<=100;t+=16){const x=l.p.x+l.dir.x*t,y=l.p.y+l.dir.y*t;s+=`<line x1="${(x-hx*20).toFixed(1)}" y1="${(y-hy*20).toFixed(1)}" x2="${(x+hx*20).toFixed(1)}" y2="${(y+hy*20).toFixed(1)}" stroke="#333" stroke-width="2.5"/>`}});s+=b(r,6,'#bba98a');break;
+ case 6:s=R(-4000,8000,'#d8a65f');for(let y=-840;y<1200;y+=28)s+=`<line x1="-3000" y1="${y}" x2="3000" y2="${y}" stroke="#b9853f" stroke-width="2"/>`;s+=b(r,9,'#ffd43b')+two(9,'#fff');break;
+ default:s=sky('#cfe7f9','#6c8f61')+b(r,10,'#8a8f95')+two(10,'#4a535c')+two(3,'#c9d2da')}
+ return s}
+function fig(z,o={}){
+ const{u,lines}=geom(z),f=n=>n.toFixed(1);
+ const seg=(p,d,h)=>`x1="${f(p.x-d.x*h)}" y1="${f(p.y-d.y*h)}" x2="${f(p.x+d.x*h)}" y2="${f(p.y+d.y*h)}"`;
+ const lp=(p,d,h)=>{for(const k of[1,-1]){const x=p.x+k*d.x*h,y=p.y+k*d.y*h;if(x>14&&x<386&&y>16&&y<272)return[x,y]}return[p.x,p.y]};
+ const lab=(t,[x,y])=>`<text class="lab" x="${f(x)}" y="${f(y)}">${t}</text>`;
+ let s=scene(Z.indexOf(z),lines,seg,u);
+ if(o.fb){const m=meetOf(z);
+  s+=`<g id="ext" style="display:none">${lines.map(l=>`<line ${seg(l.p,l.dir,6000)} class="ex"/>`).join('')}<line ${seg(C,u,6000)} class="ex"/>${m?`<circle id="mk" cx="${f(m.x)}" cy="${f(m.y)}" r="7" fill="var(--bad)"/>`:''}</g>`}
+ const ml=(p,d,h,c)=>`<line ${seg(p,d,h)} class="hl"/><line ${seg(p,d,h)} class="ln ${c}"/>`;
+ s+=ml(C,u,R0,'ref')+lines.map(l=>ml(l.p,l.dir,H,'')).join('');
+ s+=lab('가',lp(C,u,R0+8))+lab('나',lp(lines[0].p,lines[0].dir,H+14))+lab('다',lp(lines[1].p,lines[1].dir,H+14));
+ if(o.fb)s+=`<g id="fb">`+lines.map((l,i)=>{const d=z.d[i],p=l.p,q=(a,b)=>`${f(p.x+u.x*a+l.dir.x*b)},${f(p.y+u.y*a+l.dir.y*b)}`;
+  const bx=u.x+l.dir.x,by=u.y+l.dir.y,bl=Math.hypot(bx,by)||1;
+  return(d===0?`<path class="ra" d="M${q(14,0)}L${q(14,14)}L${q(0,14)}"/>`:'')+`<text class="ang ${d?'x':''}" x="${f(p.x+34*bx/bl)}" y="${f(p.y+34*by/bl)}">${90+d}°</text>`}).join('')+`</g>`;
+ return s}
+function mapHTML(){
+ const done=Object.keys(S.res).length,ok=Object.values(S.res).filter(r=>r.ok).length;
+ const pins=Z.map((z,i)=>{const r=S.res[i],lk=i>0&&!S.res[i-1],c=r?(r.ok?'var(--ok)':'var(--bad)'):lk?'#8a94a0':'var(--acc)';
+  return`<g class="pin" onclick="openZone(${i})"><circle cx="${z.x}" cy="${z.y}" r="15" fill="${c}"/><text x="${z.x}" y="${z.y+5}" text-anchor="middle" class="pn">${r?(r.ok?'✓':'✗'):lk?'🔒':i+1}</text><text x="${z.x}" y="${z.y+31}" class="pl">${i>5?'⭐':''}${z.n}</text></g>`}).join('');
+ return`<h2>🗺️ 평행선 찾기 활동</h2><p class="q">1번부터 차례대로 열려요. 기본 문제는 6개, 7·8번은 ⭐보너스예요. 번호를 눌러 구역으로 가요. 삼각자로 <b>90°인지 아닌지</b> 확인하고, 두 직선이 평행선인지 판단해 보세요!</p>
+ <svg class="scene" viewBox="0 0 400 300"><rect width="400" height="300" fill="var(--sky)"/><rect y="170" width="400" height="130" fill="var(--grass)"/>
+ <rect x="120" y="50" width="160" height="112" rx="4" fill="var(--box)" stroke="var(--line)"/><rect x="295" y="82" width="85" height="78" rx="4" fill="var(--box)" stroke="var(--line)"/>
+ <g fill="var(--card)" stroke="var(--line)"><rect x="135" y="66" width="30" height="24"/><rect x="235" y="66" width="30" height="24"/><rect x="135" y="112" width="30" height="24"/><rect x="235" y="112" width="30" height="24"/></g>
+ <ellipse cx="150" cy="255" rx="92" ry="34" fill="none" stroke="var(--card)" stroke-width="6"/><circle cx="50" cy="105" r="36" fill="none" stroke="var(--line)" stroke-width="4"/><path d="M50 141l-22 30M50 141l22 30" stroke="var(--line)" stroke-width="4"/>
+ ${pins}</svg>
+ <div class="bar"><b>⭐ 성공 ${ok}개 · 푼 구역 ${done}/8</b><span><button class="ghost" onclick="window.print()">🖨️ 활동지 인쇄</button> <button class="ghost" onclick="go('res')">📋 결과·푼 문제</button></span></div>`}
+function ask(){
+ const b=(k,t,on,fn)=>`<button class="ch ${on?'on':''}" onclick="${fn}(${k})">${t}</button>`;
+ return`<div class="box"><b>① 직선 나와 다는 평행선일까요?</b><div class="row">${b(1,'평행하다',S.pick===1,'pk')}${b(0,'평행하지 않다',S.pick===0,'pk')}</div>
+ ${S.pick!==null?`<b>② 그렇게 생각한 이유는?</b><div class="col">${RS.map((t,k)=>b(k,t,S.why===k,'wy')).join('')}</div>`:''}
+ <button class="go" ${S.pick!==null&&S.why!==null?'':'disabled'} onclick="submit()">확인하기</button></div>`}
+function review(z,r){
+ const par=isPar(z),A=z.d.map(d=>90+d),all=Object.keys(S.res).length===8;
+ const msg=r.ok?'🎉 정답! 보물을 찾았어요!':r.aOk?'답은 맞았어요! 이유를 다시 살펴봐요.':'아쉬워요. 같이 확인해 봐요.';
+ return`<div class="box"><p class="msg">${msg}</p>
+ <p>직선 가와 만나는 각: 나 <b>${A[0]}°</b>, 다 <b>${A[1]}°</b></p>
+ <p>${par?'나와 다가 모두 가에 수직(90°)이라서 평행선이에요. 아무리 늘여도 만나지 않아요.':'가에 수직이 아닌 선이 있어서 평행선이 아니에요. 선을 늘이면 빨간 점에서 만나요.'}</p>
+ <p class="mut">내 답: ${r.pick?'평행하다':'평행하지 않다'} · 이유: ${RS[r.why]}</p>
+ <div class="bar"><button class="ghost" id="zb" onclick="zoom(!S.zoom)">🔭 선 늘여 보기</button><button class="go" style="width:auto;padding:10px 18px" onclick="${all?"go('res')":'nextZone()'}">${all?'결과 보기':'다음 구역 →'}</button></div></div>`}
+function zoneHTML(){const i=S.cur,z=Z[i],r=S.res[i];
+ return`<div class="top"><button class="ghost" onclick="go('map')">← 지도</button><b>${i+1}구역 · ${z.n}</b></div>
+ <p class="q">삼각자로 직선 <b>가</b>와 직선 <b>나</b>, <b>다</b>가 만나는 각이 <b>90°</b>인지 확인해 보세요.</p>
+ <svg id="fig" class="fig" viewBox="0 0 400 280">${fig(z,{fb:!!r})}</svg>${r?review(z,r):ask()}`}
+function resHTML(){
+ const ok=Object.values(S.res).filter(r=>r.ok).length,w=ok>=6;
+ return`<div class="top"><button class="ghost" onclick="go('map')">← 지도</button><b>보물 결과</b></div>
+ <div class="chest">${w?'🏆':'🔒'}</div><h2 style="text-align:center">${w?'보물 상자가 열렸어요!':'열쇠 조각 '+ok+'/6 · 6개를 모으면 열려요'}</h2><p class="mut" style="text-align:center">8구역 중 ${ok}개 성공 · 구역을 눌러 문제를 다시 볼 수 있어요</p>
+ ${Z.map((z,i)=>{const r=S.res[i];return`<button class="item" onclick="openZone(${i})"><span>${i+1}. ${z.n}</span><b style="color:${r?(r.ok?'var(--ok)':'var(--bad)'):'var(--mut)'}">${r?(r.ok?'✓ 맞춤':'✗ 틀림'):'아직'}</b></button>`}).join('')}
+ <button class="go" style="margin-top:10px" onclick="S.res={};go('map')">처음부터 다시 하기</button>`}
+function render(){$('#app').innerHTML=S.view==='map'?mapHTML():S.view==='zone'?zoneHTML():resHTML();window.scrollTo(0,0)}
+function go(v){S.view=v;render()}
+function openZone(i){S.cur=i;S.pick=S.why=null;S.zoom=false;go('zone')}
+function pk(k){S.pick=k;render()}function wy(k){S.why=k;render()}
+function nextZone(){for(let k=1;k<=8;k++){const i=(S.cur+k)%8;if(!S.res[i])return openZone(i)}go('res')}
+function submit(){const z=Z[S.cur],par=isPar(z),aOk=(S.pick===1)===par,rOk=S.why===(par?0:1);
+ S.res[S.cur]={ok:aOk&&rOk,pick:S.pick,why:S.why,aOk,rOk};S.pick=S.why=null;S.zoom=false;render();
+ if(!(aOk&&rOk))setTimeout(()=>zoom(true),700)}
+function target(z){const m=meetOf(z);let x0=0,y0=0,x1=400,y1=280,mw=1600;
+ if(m){x0=Math.min(x0,m.x);x1=Math.max(x1,m.x);y0=Math.min(y0,m.y);y1=Math.max(y1,m.y);mw=(m.x>0&&m.x<400&&m.y>0&&m.y<280)?520:800}
+ x0-=40;y0-=40;x1+=40;y1+=40;const w=Math.max(x1-x0,(y1-y0)*400/280,mw),h=w*.7,cx=m?(x0+x1)/2:200,cy=m?(y0+y1)/2:140;
+ return[cx-w/2,cy-h/2,w,h]}
+function zoom(on){const svg=$('#fig');if(!svg||!$('#ext'))return;S.zoom=on;
+ const from=svg.getAttribute('viewBox').split(' ').map(Number),to=on?target(Z[S.cur]):[0,0,400,280];
+ if(on){$('#ext').style.display='block';$('#fb').style.display='none'}else $('#fb').style.display='block';
+ const b=$('#zb');if(b)b.textContent=on?'↩️ 원래대로':'🔭 선 늘여 보기';
+ const t0=performance.now();
+ (function step(t){const k=Math.min(1,(t-t0)/900),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2,v=from.map((a,j)=>a+(to[j]-a)*e),sc=v[2]/400;
+  svg.setAttribute('viewBox',v.join(' '));svg.querySelectorAll('.lab').forEach(x=>x.style.fontSize=18*sc+'px');
+  const mk=$('#mk');if(mk)mk.setAttribute('r',7*sc);
+  if(k<1)requestAnimationFrame(step);else if(!on)$('#ext').style.display='none'})(t0)}
+function sheet(){
+ const cell=(z,i)=>`<div class="cell"><h4>${'①②③④⑤⑥⑦⑧'[i]} ${z.n}</h4><svg width="90mm" height="63mm" viewBox="0 0 400 280">${fig(z)}</svg><p>삼각자로 잰 각: 나 ______° 다 ______°</p><p>□ 평행하다 &nbsp;&nbsp; □ 평행하지 않다</p><p>이유: ______________________</p></div>`;
+ const pg=a=>`<section class="page"><h3>🗺️ 학교 보물찾기 활동지 <small>이름: __________</small></h3><div class="grid">${a.map(([z,i])=>cell(z,i)).join('')}</div></section>`;
+ const E=Z.map((z,i)=>[z,i]);$('#sheet').innerHTML=pg(E.slice(0,4))+pg(E.slice(4))}
+const LV=[1,2,2,2,3,4,3,4],nm=['나','다'];Object.assign(S,{p90:[null,null],txt:'',retry:0,hint:'',name:''});
+const ready=()=>S.pick!==null&&S.p90[0]!==null&&S.p90[1]!==null&&S.txt.trim().length>=4;
+function upd(){const g=$('.go');if(g)g.disabled=!ready()}
+function esc(t){return t.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function grade(t,z){t=t.replace(/\s/g,'');const par=isPar(z),bad=[0,1].filter(i=>z.d[i]),
+ has90=/90|수직|직각/.test(t),neg=/아니|않|못|다르|달라|기울|모자|넘|벗어/.test(t),
+ N=/나(는|가|도|와|의|만)|\(나\)|직선나/.test(t),D=/다(는|가|도|와|의|만)|\(다\)|직선다|나(와|,)다/.test(t),all=/둘다|모두|두직선|양쪽/.test(t);
+ return has90&&(par?(N&&D)||all:bad.every(i=>[N,D][i]||all)&&neg)}
+function pk(k){S.pick=k;render()}function pm(i,v){S.p90[i]=v;render()}
+function ask(){const b=(t,on,fn)=>`<button class="ch ${on?'on':''}" onclick="${fn}">${t}</button>`;
+ return`<div class="box"><b>① 직선 나와 다는 평행선일까요?</b><div class="row">${b('평행하다',S.pick===1,'pk(1)')}${b('평행하지 않다',S.pick===0,'pk(0)')}</div>
+ <b>② 삼각자로 직접 재어 보세요. 직선 가와 만나는 각은?</b>
+ ${[0,1].map(i=>`<div class="row"><span class="tag">직선 ${nm[i]}</span>${b('90°이다',S.p90[i]===true,`pm(${i},true)`)}${b('90°가 아니다',S.p90[i]===false,`pm(${i},false)`)}</div>`).join('')}
+ <b>③ 그렇게 판단한 이유를 써 보세요.</b><textarea rows="3" placeholder="예) 직선 ○는 직선 가와 90°가 아니라서…" oninput="S.txt=this.value;upd()">${esc(S.txt)}</textarea>
+ ${S.hint?`<p class="hint">✍️ ${S.hint}</p>`:''}<button class="go" ${ready()?'':'disabled'} onclick="submit()">확인하기</button></div>`}
+function submit(){const z=Z[S.cur],par=isPar(z),aOk=(S.pick===1)===par,tOk=S.p90.every((v,i)=>v===(z.d[i]===0)),kw=grade(S.txt,z);
+ if(aOk&&tOk&&!kw&&!S.retry){S.retry=1;S.hint='서술을 조금만 보완해 봐요! '+(par?'나와 다가 둘 다 직선 가와 90°인지 써 보세요.':'어느 직선(나/다)이 직선 가와 90°가 아닌지 이름과 함께 써 보세요.');render();return}
+ S.res[S.cur]={ok:aOk&&tOk&&kw,pick:S.pick,p90:S.p90.slice(),txt:S.txt,aOk,tOk,kw};S.hint='';S.zoom=false;render();
+ if(!S.res[S.cur].ok)setTimeout(()=>zoom(true),700)}
+function tipm(m){const e=document.createElement('div');e.textContent=m;e.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#2b2b3a;color:#fff;padding:10px 16px;border-radius:12px;z-index:9;font-weight:700;max-width:90%;text-align:center';document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+function retry(){delete S.res[S.cur];S.pick=null;S.p90=[null,null];S.txt='';S.retry=0;S.hint='';S.zoom=false;render()}
+function tip(i){const e=document.createElement('div');e.textContent='🔒 '+i+'구역을 먼저 풀어 보세요';e.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#2b2b3a;color:#fff;padding:10px 16px;border-radius:12px;z-index:9;font-weight:700';document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}
+function openZone(i){const all=Object.keys(S.res).length===8;if(S.res[i]&&!all){tipm('🔒 8구역을 모두 푼 뒤에 다시 볼 수 있어요');return}if(i>0&&!S.res[i-1]&&!S.res[i]){tip(i);return}S.cur=i;S.pick=null;S.p90=[null,null];S.txt='';S.retry=0;S.hint='';S.zoom=false;go('zone')}
+function review(z,r){const par=isPar(z),A=z.d.map(d=>90+d),all=Object.keys(S.res).length===8,bad=[0,1].filter(i=>z.d[i]),
+ model=par?'직선 나와 다는 모두 직선 가와 90°로 만나서 평행선이에요.':`직선 ${bad.map(i=>nm[i]).join('와 ')}${bad.length>1?'는 둘 다':'는'} 직선 가와 90°가 아니라서 평행선이 아니에요.`,
+ mk=v=>v?'✅':'❌',msg=r.ok?'🎉 정답! 보물을 찾았어요!':r.aOk&&r.tOk?'판단과 측정은 맞았어요. 서술을 모범 답과 비교해 봐요.':'아쉬워요. 같이 확인해 봐요.';
+ return`<div class="box"><p class="msg">${msg}</p><p>직선 가와 만나는 각: 나 <b>${A[0]}°</b>, 다 <b>${A[1]}°</b></p>
+ <p>${mk(r.aOk)} 평행 판단 &nbsp; ${mk(r.tOk)} 90° 측정 &nbsp; ${mk(r.kw)} 서술</p>
+ <p class="mut">내 서술: “${esc(r.txt)}”</p><p><b>모범 답:</b> ${model}</p>
+ <div class="bar"><button class="ghost" id="zb" onclick="zoom(!S.zoom)">🔭 선 늘여 보기</button><button class="go" style="width:auto;padding:10px 18px" onclick="${all?"go('res')":'nextZone()'}">${all?'결과 보기':'다음 구역 →'}</button></div></div>`}
+function zoneHTML(){const i=S.cur,z=Z[i],r=S.res[i];
+ return`<div class="top"><button class="ghost" onclick="go('map')">← 지도</button><b>${i+1}구역${i>5?' ⭐보너스':''} · ${z.n}</b></div>
+ <p class="q">삼각자를 직접 대어 직선 <b>가</b>와 직선 <b>나</b>, <b>다</b>가 만나는 각이 <b>90°</b>인지 재어 보세요. <b>눈대중은 안 돼요!</b></p>
+ <svg id="fig" class="fig" viewBox="0 0 400 280">${fig(z,{fb:!!r})}</svg>${r?review(z,r):ask()}`}
+function resHTML(){const ok=Object.keys(S.res).filter(k=>k<6&&S.res[k].ok).length,bo=Object.keys(S.res).filter(k=>k>=6&&S.res[k].ok).length,w=ok>=4;
+ return`<div class="top"><button class="ghost" onclick="go('map')">← 지도</button><b>보물 결과</b></div>
+ <div class="chest">${w?'🏆':'🔒'}</div><h2 style="text-align:center">${w?'보물 상자가 열렸어요!':'열쇠 조각 '+ok+'/4 · 기본 문제 4개를 맞히면 열려요'}</h2><p class="mut" style="text-align:center">기본 ${ok}/6 · ⭐보너스 ${bo}/2 성공 · 8구역을 모두 푼 뒤 틀린 문제를 다시 풀 수 있어요</p>
+ ${w?'<button class="go" onclick="go(\'cert\')">📜 평행 측정 인증서 받기</button>':''}
+ ${Z.map((z,i)=>{const r=S.res[i];return`<button class="item" onclick="openZone(${i})"><span>${i+1}. ${z.n}</span><b style="color:${r?(r.ok?'var(--ok)':'var(--bad)'):'var(--mut)'}">${r?(r.ok?'✓ 맞춤':'✗ 틀림'):'아직'}</b></button>`}).join('')}
+ <button class="go" style="margin-top:10px" onclick="S.res={};go('map')">처음부터 다시 하기</button>`}
+function certHTML(){const ok=Object.values(S.res).filter(r=>r.ok).length,d=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+ return`<div class="cert"><div class="seal">🏅</div><h1>평행 측정 인증서</h1><p class="who">${S.name?esc(S.name):'＿＿＿＿＿'} 학생</p>
+ <p>위 학생은 삼각자로 직선이 만나는 각을 <b>직접 재어</b><br>평행선을 정확히 판별하여<br>평행선 찾기 활동에서 <b>${ok}개 구역</b>을 해결하였기에 이 인증서를 드립니다.</p>
+ <table>${Z.map((z,i)=>{const r=S.res[i];return`<tr><td>${i+1}. ${z.n}</td><td>${r?(r.ok?'✓':'✗'):'-'}</td></tr>`}).join('')}</table>
+ <p class="dt">${d}</p><p>4학년 수학 · 평행 탐구단</p></div>`}
+function certScreen(){return`<div class="top"><button class="ghost" onclick="go('res')">← 결과</button><b>인증서</b></div><div class="bar"><input class="ip" placeholder="이름을 입력하세요" value="${esc(S.name)}" oninput="S.name=this.value;$('#cv').innerHTML=certHTML()"><button class="go" style="width:auto;padding:10px 16px" onclick="printCert()">🖨️ 인쇄</button></div><div id="cv">${certHTML()}</div>`}
+function printCert(){$('#cert').innerHTML=certHTML();document.body.classList.add('pcert');window.print();setTimeout(()=>document.body.classList.remove('pcert'),800)}
+function render(){$('#app').innerHTML=S.view==='map'?mapHTML():S.view==='zone'?zoneHTML():S.view==='cert'?certScreen():resHTML();window.scrollTo(0,0)}
+const ready2=()=>S.pick!==null&&S.p90[0]!==null&&S.p90[1]!==null;
+function nx(){Object.keys(S.res).length===8?go('res'):nextZone()}
+function ask(){const b=(t,on,fn)=>`<button class='ch ${on?'on':''}' onclick='${fn}'>${t}</button>`;
+ return`<div class='box'><b>① 직선 나와 다는 평행선일까요?</b><div class='row'>${b('평행하다',S.pick===1,'pk(1)')}${b('평행하지 않다',S.pick===0,'pk(0)')}</div><b>② 삼각자로 직접 재어 보세요. 직선 가와 만나는 각은?</b>${[0,1].map(i=>`<div class='row'><span class='tag'>직선 ${nm[i]}</span>${b('90°이다',S.p90[i]===true,'pm('+i+',true)')}${b('90°가 아니다',S.p90[i]===false,'pm('+i+',false)')}</div>`).join('')}<button class='go' ${ready2()?'':'disabled'} onclick='submit()'>확인하기</button></div>`}
+function submit(){const z=Z[S.cur],par=isPar(z),aOk=(S.pick===1)===par,tOk=S.p90.every((v,i)=>v===(z.d[i]===0));
+ S.res[S.cur]={ok:aOk&&tOk,pick:S.pick,p90:S.p90.slice(),aOk,tOk};S.zoom=false;render();if(!S.res[S.cur].ok)setTimeout(()=>zoom(true),700)}
+function review(z,r){const par=isPar(z),A=z.d.map(d=>90+d),all=Object.keys(S.res).length===8,bad=[0,1].filter(i=>z.d[i]),
+ model=par?'직선 나와 다는 모두 직선 가와 90°로 만나서 평행선이에요.':`직선 ${bad.map(i=>nm[i]).join('와 ')}${bad.length>1?'는 둘 다':'는'} 직선 가와 90°가 아니라서 평행선이 아니에요.`,
+ mk=v=>v?'✅':'❌',msg=r.ok?'🎉 정답! 보물을 찾았어요!':r.aOk?'평행 판단은 맞았지만 측정 결과를 다시 확인해 봐요.':'아쉬워요. 같이 확인해 봐요.';
+ return`<div class='box'><p class='msg'>${msg}</p><p>직선 가와 만나는 각: 나 <b>${A[0]}°</b>, 다 <b>${A[1]}°</b></p><p>${mk(r.aOk)} 평행 판단 &nbsp; ${mk(r.tOk)} 90° 측정</p><p><b>정리:</b> ${model}</p><div class='bar'><button class='ghost' id='zb' onclick='zoom(!S.zoom)'>🔭 선 늘여 보기</button>${all&&!r.ok?`<button class='ghost' onclick='retry()'>🔁 다시 풀기</button>`:''}<button class='go' style='width:auto;padding:10px 18px' onclick='nx()'>${all?'결과 보기':'다음 구역 →'}</button></div></div>`}
+function sheet(){const cell=(z,i)=>`<div class='cell'><h4>${'①②③④⑤⑥⑦⑧'[i]} ${z.n}</h4><svg width='90mm' height='63mm' viewBox='0 0 400 280'>${fig(z)}</svg><p>삼각자로 잰 각: 나 ______° 다 ______°</p><p>□ 평행하다 &nbsp;&nbsp; □ 평행하지 않다</p></div>`,
+ pg=a=>`<section class='page'><h3>🗺️ 평행선 찾기 활동지 <small>이름: __________</small></h3><div class='grid'>${a.map(([z,i])=>cell(z,i)).join('')}</div></section>`,E=Z.map((z,i)=>[z,i]);$('#sheet').innerHTML=pg(E.slice(0,4))+pg(E.slice(4))}
+function scene(i,L,seg,u){
+ const[A,B]=L,r={p:C,dir:u},E=120,K='#2b2b3a',
+ b=(l,w,c)=>`<line ${seg(l.p,l.dir,E)} stroke='${c}' stroke-width='${w}' stroke-linecap='round'/>`,
+ ob=(l,w,c)=>b(l,w+5,K)+b(l,w,c),
+ F=(y,h,c)=>`<rect x='-4000' y='${y}' width='8000' height='${h}' fill='${c}'/>`,
+ sky=(a,g,y=140)=>F(-4000,4000+y,a)+F(y,4000,g),
+ P=(d,c)=>`<path d='${d}' fill='${c}' stroke='${K}' stroke-width='3' stroke-linejoin='round'/>`,
+ pt=(l,k)=>`${(l.p.x+k*l.dir.x*E).toFixed(1)},${(l.p.y+k*l.dir.y*E).toFixed(1)}`,
+ tips=(l,c)=>[-1,1].map(k=>`<circle cx='${(l.p.x+k*l.dir.x*E).toFixed(1)}' cy='${(l.p.y+k*l.dir.y*E).toFixed(1)}' r='11' fill='${c}' stroke='${K}' stroke-width='3'/>`).join(''),
+ cl=(x,y,s)=>`<g><animateTransform attributeName='transform' type='translate' values='0 0;16 0;0 0' dur='${6+s*4}s' repeatCount='indefinite'/><g transform='translate(${x} ${y}) scale(${s})'><g fill='${K}' stroke='${K}' stroke-width='6'><ellipse rx='26' ry='11'/><circle cx='-10' cy='-8' r='11'/><circle cx='7' cy='-11' r='14'/></g><g fill='#fff'><ellipse rx='26' ry='11'/><circle cx='-10' cy='-8' r='11'/><circle cx='7' cy='-11' r='14'/></g></g></g>`,
+ sun=(x,y)=>`<g transform='translate(${x} ${y})'><circle r='21' fill='#ffd54a' stroke='${K}' stroke-width='3'/><circle cx='-7' cy='-3' r='2.6' fill='${K}'/><circle cx='7' cy='-3' r='2.6' fill='${K}'/><path d='M-7 6q7 7 14 0' stroke='${K}' fill='none' stroke-width='2.5' stroke-linecap='round'/></g>`;
+ let s='';
+ switch(i){
+ case 0:s=sky('#9fdcff','#8fd46b',150)+sun(350,40)+cl(80,48,1)+cl(250,30,.8)+P('M18 150V104l42-30 42 30v46z','#ffd1a8')+`<rect x='50' y='122' width='20' height='28' rx='3' fill='#c98a5b' stroke='${K}' stroke-width='3'/>`+ob(r,16,'#f6c445')+ob(A,22,'#4f7cff')+ob(B,22,'#4f7cff')+tips(A,'#f6c445')+tips(B,'#f6c445');break;
+ case 1:s=F(-4000,8000,'#ffe3ec')+[...Array(9)].map((_,k)=>`<rect x='${-20+k*48}' y='${262-k*30}' width='60' height='70' fill='${k%2?'#ffc78a':'#ffd7a6'}' stroke='${K}' stroke-width='3'/>`).join('')+ob(r,14,'#ff7a90')+ob(A,20,'#35b3a6')+ob(B,20,'#35b3a6')+tips(A,'#fff')+tips(B,'#fff');break;
+ case 2:s=sky('#9fdcff','#5ec26a',130)+[...Array(7)].map((_,k)=>k%2?'':`<rect x='${k*70-35}' y='130' width='70' height='300' fill='#52b85d'/>`).join('')+sun(350,36)+cl(90,40,1)+`<polygon points='${pt(A,-1)} ${pt(A,1)} ${pt(B,1)} ${pt(B,-1)}' fill='#fff' opacity='.4'/>`+ob(r,18,'#fff')+ob(A,18,'#fff')+ob(B,18,'#fff')+`<g transform='translate(60 236)'><circle r='16' fill='#fff' stroke='${K}' stroke-width='3'/><path d='M0-7l7 5-3 8h-8l-3-8z' fill='${K}'/></g>`;break;
+ case 3:s=F(-4000,8000,'#e8825a')+[...Array(12)].map((_,k)=>`<path d='M${k%2?-13:0} ${14+k*26}${'a13 13 0 0 0 26 0'.repeat(17)}' fill='none' stroke='#b85a38' stroke-width='2.5'/>`).join('')+`<polygon points='${pt(A,-1)} ${pt(A,1)} ${pt(B,1)} ${pt(B,-1)}' fill='#bfeaff' stroke='${K}' stroke-width='3'/>`+ob(r,14,'#fff6e5')+ob(A,20,'#fff6e5')+ob(B,20,'#fff6e5');break;
+ case 4:s=sky('#a8e0ff','#7ed66b',150)+cl(90,40,1)+sun(345,38)+`<rect x='338' y='118' width='12' height='42' fill='#a0693d' stroke='${K}' stroke-width='3'/><circle cx='344' cy='104' r='26' fill='#3fb34f' stroke='${K}' stroke-width='3'/>`+ob(r,14,'#cfd8dc')+ob(A,20,'#ff6b6b')+ob(B,20,'#ff6b6b')+tips(A,'#ffd54a')+tips(B,'#ffd54a');break;
+ case 5:s=F(-4000,8000,'#fff1f5')+[...Array(8)].map((_,k)=>`<circle cx='${30+k*52}' cy='${k%2?40:245}' r='14' fill='${['#ffd6e0','#d6f0ff','#fff3b8','#d9f7d9'][k%4]}' stroke='${K}' stroke-width='2'/>`).join('');[A,B].forEach((l,j)=>{const a=rad((j?1:-1)*50),c=Math.cos(a),n=Math.sin(a),hx=l.dir.x*c-l.dir.y*n,hy=l.dir.x*n+l.dir.y*c;for(let t=-100;t<=100;t+=16){const x=l.p.x+l.dir.x*t,y=l.p.y+l.dir.y*t;s+=`<line x1='${(x-hx*20).toFixed(1)}' y1='${(y-hy*20).toFixed(1)}' x2='${(x+hx*20).toFixed(1)}' y2='${(y+hy*20).toFixed(1)}' stroke='#3a3a8c' stroke-width='3'/>`}});s+=b(r,6,'#c5b7e8');break;
+ case 6:s=F(-4000,8000,'#f2b66d');for(let y=-840;y<1200;y+=28)s+=`<line x1='-3000' y1='${y}' x2='3000' y2='${y}' stroke='#c98a3f' stroke-width='2.5'/>`;s+=`<g transform='translate(66 228)'><circle r='18' fill='#ff8a3d' stroke='${K}' stroke-width='3'/><path d='M-18 0H18M0-18V18' stroke='${K}' stroke-width='2' fill='none'/></g><g transform='translate(340 52)'><circle r='14' fill='#ff8a3d' stroke='${K}' stroke-width='3'/><path d='M-14 0H14M0-14V14' stroke='${K}' stroke-width='2' fill='none'/></g>`+ob(r,12,'#ffe066')+ob(A,14,'#fff')+ob(B,14,'#fff');break;
+ default:s=sky('#bfe6ff','#8fd46b',200)+cl(70,40,1.1)+cl(190,70,.7)+`<g transform='translate(320 110)'><path d='M0 0L-34 100M0 0L34 100' stroke='${K}' stroke-width='7'/><g><animateTransform attributeName='transform' type='rotate' from='0' to='360' dur='40s' repeatCount='indefinite'/><circle r='64' fill='none' stroke='${K}' stroke-width='5'/>${[0,1,2,3,4,5,6,7].map(k=>{const a=k*Math.PI/4,x=(64*Math.cos(a)).toFixed(1),y=(64*Math.sin(a)).toFixed(1);return`<line x2='${x}' y2='${y}' stroke='${K}' stroke-width='3'/><circle cx='${x}' cy='${y}' r='9' fill='${['#ff5a5f','#ffd54a','#4f7cff','#35b3a6'][k%4]}' stroke='${K}' stroke-width='3'/>`}).join('')}</g></g>`+ob(r,12,'#9aa5b1')+ob(A,18,'#ff5a5f')+ob(B,18,'#ff5a5f')}
+ return s}
+document.head.insertAdjacentHTML('beforeend',`<style>.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}@media(min-width:620px){.cards{grid-template-columns:repeat(4,1fr)}}.card{position:relative;padding:0;border:0;border-radius:12px;overflow:hidden;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.3);aspect-ratio:10/7}.card svg{display:block;width:100%}.card svg{height:100%}.num{position:absolute;top:6px;left:6px;min-width:26px;height:26px;padding:0 4px;border-radius:13px;color:#fff;font-weight:800;display:grid;place-items:center;border:2px solid #fff}.nm{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 5px;color:#fff;font-weight:700;font-size:13px;text-align:left;background:linear-gradient(transparent,rgba(0,0,0,.7))}@media print{.ph{display:none}}</style>`);
+document.body.insertAdjacentHTML('afterbegin',`<svg width='0' height='0' style='position:absolute' aria-hidden='true'><defs><filter id='gr' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><radialGradient id='vg' cx='50%' cy='50%' r='75%'><stop offset='55%' stop-color='#000' stop-opacity='0'/><stop offset='100%' stop-color='#000' stop-opacity='.45'/></radialGradient><linearGradient id='lt' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#fff' stop-opacity='.22'/><stop offset='.5' stop-color='#fff' stop-opacity='0'/><stop offset='1' stop-color='#000' stop-opacity='.18'/></linearGradient></defs></svg>`);
+const _sc=scene,_scOff=(i,L,seg,u)=>_sc(i,L,seg,u)+`<g class='ph' pointer-events='none'><rect width='400' height='280' filter='url(#gr)' opacity='.16' style='mix-blend-mode:overlay'/><rect width='400' height='280' fill='url(#lt)'/><rect width='400' height='280' fill='url(#vg)'/></g>`;
+let DB=null,UM=null,UID=null,UNSUB=null;
+(async()=>{try{DB=await claude.use('db');UM=await claude.use('user');if(UM){UID=await UM.id();S.owner=(await UM.isOwner())||(await UM.canEdit());if(S.owner&&S.view==='map')render()}}catch(e){}})();
+function saveRes(){try{if(!DB||!S.num)return;const z={};Object.keys(S.res).forEach(k=>{z[k]=S.res[k].ok?1:0});DB.doc('results/n'+S.num).set({num:S.num,ok:Object.values(S.res).filter(r=>r.ok).length,done:Object.keys(S.res).length,z,t:Date.now()}).catch(()=>{})}catch(e){}}
+const _s0=submit;
+function gm(){go('map')}
+document.head.insertAdjacentHTML('beforeend',`<style>.nums{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:8px}.nums button{padding:12px 0;font-weight:700}</style>`);
+function setNum(n){S.num=n;render()}
+const _mo=mapHTML;const _mapOff=()=>{if(!S.num&&!S.owner)return`<h2>🗺️ 학교 보물찾기</h2><div class='box'><b>내 번호를 골라 주세요</b><div class='nums'>${[...Array(24)].map((_,i)=>`<button class='ghost' onclick='setNum(${i+1})'>${i+1}</button>`).join('')}</div></div>`;return _mo()+(S.num?`<p class='mut'>내 번호: ${S.num}번</p>`:'')+(S.owner?`<div class='bar'><button class='ghost' onclick='dashOpen()'>📊 풀이 현황 (교사용)</button></div>`:'')};
+function dashOpen(){go('dash');if(!DB)return;if(UNSUB)UNSUB();UNSUB=DB.collection('results').onSnapshot(async s=>{S.board=s.docs.map(d=>({id:d.id,...d.data()}));try{S.prof=UM?await UM.profiles(S.board.map(b=>b.id)):{}}catch(e){S.prof={}}if(S.view==='dash')drawDash()},()=>{S.board=[];if(S.view==='dash')drawDash()})}
+function dashHTML(){return`<div class='top'><button class='ghost' onclick='gm()'>← 지도</button><b>📊 풀이 현황 (교사용)</b></div><div id='dash' class='box'>불러오는 중…</div>`}
+function drawDash(){const el=$('#dash');if(!el)return;
+ if(!DB){el.innerHTML='실시간 집계를 사용할 수 없어요. 로그인과 공유 설정을 확인해 주세요.';return}
+ const B=S.board||[],P=S.prof||{},n=B.length,all=B.filter(b=>b.done>=8).length,tr=B.filter(b=>b.ok>=6).length;
+ const rows=Z.map((z,i)=>{const a=B.filter(b=>b.z&&b.z[i]!==undefined),c=a.filter(b=>b.z[i]===1).length;return`<div class='item' style='cursor:default'><span>${i+1}. ${z.n} ${'★'.repeat(LV[i])}</span><b>${a.length?Math.round(c/a.length*100)+'% ('+c+'/'+a.length+')':'-'}</b></div>`}).join('');
+ const ppl=B.slice().sort((x,y)=>(x.num||0)-(y.num||0)).map(b=>`<div class='item' style='cursor:default'><span>${b.num?b.num+'번':'학생'}</span><b>${b.done}/8 푼 · ${b.ok}개 성공</b></div>`).join('');
+ el.innerHTML=`<p><b>참여 ${n}명</b> · 8구역 모두 푼 학생 ${all}명 · 보물 획득 ${tr}명</p><b>구역별 정답률</b>${rows}<p class='mut'>아직 시작 안 한 번호: ${[...Array(24)].map((_,i)=>i+1).filter(k=>!B.some(b=>b.num===k)).join(', ')||'없음'}</p><b>학생별 현황</b>${ppl||`<p class='mut'>아직 푼 학생이 없어요.</p>`}`}
+function mapCards(){const done=Object.keys(S.res).length,ok=Object.values(S.res).filter(r=>r.ok).length;
+ const cards=Z.map((z,i)=>{const r=S.res[i],g=geom(z),seg=(p,d,h)=>`x1='${(p.x-d.x*h).toFixed(1)}' y1='${(p.y-d.y*h).toFixed(1)}' x2='${(p.x+d.x*h).toFixed(1)}' y2='${(p.y+d.y*h).toFixed(1)}'`;
+  return`<button class='card' onclick='openZone(${i})'><svg viewBox='0 0 400 280'>${scene(i,g.lines,seg,g.u)}</svg><span class='num' style='background:${r?(r.ok?'var(--ok)':'var(--bad)'):'var(--acc)'}'>${r?(r.ok?'✓':'✗'):i+1}</span><span class='nm'>${z.n}</span></button>`}).join('');
+ return`<h2>🗺️ 학교 보물찾기</h2><p class='q'>사진을 눌러 구역으로 가요. 삼각자로 <b>90°인지 아닌지</b> 직접 재어 보세요!</p><div class='cards'>${cards}</div>
+ <div class='bar'><b>⭐ 성공 ${ok}개 · 푼 구역 ${done}/8</b><span><button class='ghost' onclick='window.print()'>🖨️ 활동지 인쇄</button> <button class='ghost' onclick='go(&quot;res&quot;)'>📋 결과·푼 문제</button>${S.owner?` <button class='ghost' onclick='dashOpen()'>📊 풀이 현황</button>`:''}</span></div>`}
+function render(){$('#app').innerHTML=S.view==='map'?mapHTML():S.view==='zone'?zoneHTML():S.view==='cert'?certScreen():S.view==='dash'?dashHTML():resHTML();window.scrollTo(0,0);if(S.view==='dash')drawDash()}
+document.body.insertAdjacentHTML('beforeend','<div id="cert"></div>');
+sheet();render();
+</script></body></html>
